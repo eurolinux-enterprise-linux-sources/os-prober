@@ -1,0 +1,26 @@
+From a523db148d1af573614f92f3284068ef08b2c5b6 Mon Sep 17 00:00:00 2001
+From: Peter Jones <pjones@redhat.com>
+Date: Thu, 10 May 2012 14:47:35 -0400
+Subject: [PATCH 02/18] Don't count dummy mach_kernel as MacOS X (#811412)
+
+Resolves: rhbz#811412
+---
+ os-probes/mounted/powerpc/20macosx | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/os-probes/mounted/powerpc/20macosx b/os-probes/mounted/powerpc/20macosx
+index dd4207f..16d9da6 100755
+--- a/os-probes/mounted/powerpc/20macosx
++++ b/os-probes/mounted/powerpc/20macosx
+@@ -21,7 +21,7 @@ esac
+ # but I don't think it exists on Mac OS <= 9, and it's XML so parsing in
+ # shell will be nasty.
+ 
+-if [ -e "$2/mach_kernel" ]; then
++if [ -e "$2/mach_kernel" ] && ! dd if="$2/mach_kernel" count=1 bs=5 2>/dev/null | grep -q Dummy ; then
+   label="$(count_next_label MacOSX)"
+   result "$1:Mac OS X:$label:macosx"
+   exit 0
+-- 
+2.5.5
+

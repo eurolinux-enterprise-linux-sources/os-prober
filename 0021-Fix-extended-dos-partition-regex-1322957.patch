@@ -1,0 +1,30 @@
+From 8f35f6d6f82a69dc569574ba644c635b09254065 Mon Sep 17 00:00:00 2001
+From: Robert Marshall <rmarshall@redhat.com>
+Date: Wed, 14 Sep 2016 14:35:09 -0400
+Subject: [PATCH] Fix extended dos partition regex (#1322957)
+
+The regular expression detecting instances of extended dos partitions
+did not capture all cases. Modified the expression to correctly capture
+the case where the target phrase is followed by a newline.
+
+Resolves: rhbz#1322957
+---
+ common.sh | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/common.sh b/common.sh
+index 4cd300d..b460d7a 100644
+--- a/common.sh
++++ b/common.sh
+@@ -138,7 +138,7 @@ is_dos_extended_partition() {
+ 		fi
+ 
+ 		# dos partition type and no filesystem type?...
+-		if echo $output | grep -q ' PTTYPE=dos ' &&
++		if echo $output | grep -q ' PTTYPE=dos\( \|$\)' &&
+ 				! echo $output | grep -q ' TYPE='; then
+ 			return 0
+ 		else
+-- 
+2.7.4
+

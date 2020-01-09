@@ -1,0 +1,37 @@
+From 723a35738d00b6ed46a9c298301e0dc6dfa78f2f Mon Sep 17 00:00:00 2001
+From: Cyril Brulebois <kibi@debian.org>
+Date: Thu, 8 Oct 2015 14:25:56 +0200
+Subject: [PATCH 17/18] Add Windows 10 detection support (#1322956)
+
+------------------------------------------------------------------------
+Add support for Windows 10 (Closes: #801278).
+
+It was previously reported as Windows Recovery Environment.
+
+Thanks, Philipp Wolfer!
+------------------------------------------------------------------------
+(cherry picked from commit cb4370f2678de0b99171ffeac3cd67402271ce2e)
+
+Resolves: rhbz#1322956
+---
+ os-probes/mounted/x86/20microsoft | 4 +++-
+ 1 file changed, 3 insertions(+), 1 deletion(-)
+
+diff --git a/os-probes/mounted/x86/20microsoft b/os-probes/mounted/x86/20microsoft
+index ca255d8..668bb4e 100755
+--- a/os-probes/mounted/x86/20microsoft
++++ b/os-probes/mounted/x86/20microsoft
+@@ -31,7 +31,9 @@ if item_in_dir -q bootmgr "$2"; then
+ 	for boot in $(item_in_dir boot "$2"); do
+ 		bcd=$(item_in_dir bcd "$2/$boot")
+ 		if [ -n "$bcd" ]; then
+-			if grep -aqs "W.i.n.d.o.w.s. .8" "$2/$boot/$bcd"; then
++			if   grep -aqs "W.i.n.d.o.w.s. .1.0" "$2/$boot/$bcd"; then
++				long="Windows 10 (loader)"
++			elif grep -aqs "W.i.n.d.o.w.s. .8" "$2/$boot/$bcd"; then
+ 				long="Windows 8 (loader)"
+ 			elif grep -aqs "W.i.n.d.o.w.s. .7" "$2/$boot/$bcd"; then
+ 				long="Windows 7 (loader)"
+-- 
+2.5.5
+

@@ -1,0 +1,43 @@
+From d7958293328ba96b5cc7f743b4dd4644a35cb16b Mon Sep 17 00:00:00 2001
+From: Robert Marshall <rmarshall@redhat.com>
+Date: Thu, 31 Mar 2016 13:54:18 -0400
+Subject: [PATCH 18/18] Suppress non-blocking dmraid error info (#1198918)
+
+Calls to dmraid did not uniformly redirect standard error. Disks with
+unsupported sector sizes are safely ignored and not added to the list of
+disks even though an error message is sent to stderr.
+
+Redirected stderr output for invocations of dmraid to /dev/null. This is
+safe because actual failures would return a non-zero exit code and
+os-prober already guards against those failures.
+
+Resolves: rhbz#1198918
+---
+ os-prober | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/os-prober b/os-prober
+index 4b371d6..ccfdf13 100755
+--- a/os-prober
++++ b/os-prober
+@@ -25,7 +25,7 @@ on_sataraid () {
+ 	type dmraid >/dev/null 2>&1 || return 1
+ 	local parent="${1%/*}"
+ 	local device="/dev/${parent##*/}"
+-	if dmraid -r -c | grep -q "$device"; then
++	if dmraid -r -c 2>/dev/null | grep -q "$device"; then
+ 		return 0
+ 	fi
+ 	return 1
+@@ -49,7 +49,7 @@ partitions () {
+ 		# Add Serial ATA RAID devices
+ 		if type dmraid >/dev/null 2>&1 && \
+ 		   dmraid -s -c >/dev/null 2>&1; then
+-			for raidset in $(dmraid -sa -c); do
++			for raidset in $(dmraid -sa -c 2>/dev/null ); do
+ 				for part in /dev/mapper/"$raidset"*[0-9]; do
+ 					echo "$part"
+ 				done
+-- 
+2.5.5
+

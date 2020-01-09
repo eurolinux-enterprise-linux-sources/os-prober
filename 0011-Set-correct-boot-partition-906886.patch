@@ -1,0 +1,43 @@
+From f21658a98e0e0456c0dfb6852cb4bbdda9298647 Mon Sep 17 00:00:00 2001
+From: "H.J. Lu" <hongjiu.lu@intel.com>
+Date: Tue, 5 Feb 2013 21:47:40 +0330
+Subject: [PATCH 11/18] Set correct boot partition (#906886)
+
+If the boot and root are mounted then os-prober was selecting
+the wrong boot partition.
+
+Resolves: rhbz#906886
+---
+ common.sh         | 2 +-
+ linux-boot-prober | 2 +-
+ 2 files changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/common.sh b/common.sh
+index 52b0d2b..1dbf7a3 100644
+--- a/common.sh
++++ b/common.sh
+@@ -123,7 +123,7 @@ parse_proc_mounts () {
+ 		set -f
+ 		set -- $line
+ 		set +f
+-		printf '%s %s %s\n' "$(mapdevfs "$1")" "$2" "$3"
++		printf '%s %s %s %s\n' "$(mapdevfs "$1")" "$2" "$3" "$1"
+ 	done
+ }
+ 
+diff --git a/linux-boot-prober b/linux-boot-prober
+index 505c2fd..57bf245 100755
+--- a/linux-boot-prober
++++ b/linux-boot-prober
+@@ -167,7 +167,7 @@ else
+ 			bootpart="${mountboot%% *}"
+ 			bootmounted="${mountboot#* }"
+ 		else
+-			bootpart="$partition"
++			bootpart="$(grep " $mpoint/boot " "$OS_PROBER_TMP/mounted-map" | head -n1 | cut -d " " -f 4)"
+ 			bootmounted=0
+ 		fi
+ 		for test in /usr/lib/linux-boot-probes/mounted/*; do
+-- 
+2.5.5
+

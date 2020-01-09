@@ -1,0 +1,32 @@
+From 23fdf30de70d22ce737e66fbf63cc2365339dc1a Mon Sep 17 00:00:00 2001
+From: IBM Bug Proxy <bugproxy@us.ibm.com>
+Date: Fri, 25 May 2012 16:24:42 +0430
+Subject: [PATCH 04/18] Yaboot allows spaces in append (#825041)
+
+Yaboot configuration files may contain append statements with a space
+before and after the assignment operator. Update os-prober to be able to
+parse these files successfully.
+
+Resolves: rhbz#825041
+---
+ linux-boot-probes/mounted/powerpc/40yaboot | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/linux-boot-probes/mounted/powerpc/40yaboot b/linux-boot-probes/mounted/powerpc/40yaboot
+index 26d8a16..cbb87da 100755
+--- a/linux-boot-probes/mounted/powerpc/40yaboot
++++ b/linux-boot-probes/mounted/powerpc/40yaboot
+@@ -74,8 +74,8 @@ parse_yaboot_conf () {
+ 				kernel="$(dequote "$2")"
+ 			;;
+ 			append)
+-				shift 1
+-				parameters="$(dequote "${line#append=}")"
++				cleanappend=`printf %s "$line" | sed -E 's/append(\s)*=(\s)*//'`
++				parameters="$(dequote "$cleanappend")"
+ 			;;
+ 			initrd)
+ 				initrd="$(dequote "$2")"
+-- 
+2.5.5
+

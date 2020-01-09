@@ -1,0 +1,40 @@
+From e448a5baca1bb9bcb36cdc2a73de8d7edb3e96f3 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Pavel=20Lis=C3=BD?= <pavel.lisy@gmail.com>
+Date: Sat, 5 May 2012 14:00:01 +0430
+Subject: [PATCH 03/18] Detect OS installed to mdraid partition (#752402)
+
+Add ability to find operating systems installed on mdraid partitions.
+
+Resolves: rhbz#752402
+---
+ os-prober | 7 ++++++-
+ 1 file changed, 6 insertions(+), 1 deletion(-)
+
+diff --git a/os-prober b/os-prober
+index 2a08736..99ede8e 100755
+--- a/os-prober
++++ b/os-prober
+@@ -57,6 +57,11 @@ partitions () {
+ 		exit 0
+ 	fi
+ 
++	# Add MD RAID devices
++	if [ -f /proc/mdstat ] ; then
++		awk '/^md/ {printf "/dev/"$1"\n"}' /proc/mdstat
++	fi
++
+ 	# Also detect OSes on LVM volumes (assumes LVM is active)
+ 	if type lvs >/dev/null 2>&1; then
+ 		echo "$(LVM_SUPPRESS_FD_WARNINGS=1 log_output lvs --noheadings --separator : -o vg_name,lv_name |
+@@ -116,7 +121,7 @@ if [ -f /proc/swaps ]; then
+ fi
+ : >"$OS_PROBER_TMP/raided-map"
+ if [ -f /proc/mdstat ] ; then
+-	grep "^md" /proc/mdstat | parse_proc_mdstat >"$OS_PROBER_TMP/raided-map" || true
++	grep "^md" /proc/mdstat | cut -d: -f2- | parse_proc_mdstat >"$OS_PROBER_TMP/raided-map" || true
+ fi
+ 
+ for partition in $(partitions); do
+-- 
+2.5.5
+

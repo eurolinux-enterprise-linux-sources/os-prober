@@ -1,0 +1,28 @@
+Source: os-prober
+Section: debian-installer
+Priority: optional
+Maintainer: Debian Install System Team <debian-boot@lists.debian.org>
+Uploaders: Colin Watson <cjwatson@debian.org>, Joey Hess <joeyh@debian.org>, Christian Perrier <bubulle@debian.org>, Steve McIntyre <93sam@debian.org>
+Build-Depends: debhelper (>= 7.0.50)
+Standards-Version: 3.9.3
+Vcs-Browser: http://git.debian.org/?p=d-i/os-prober.git
+Vcs-Git: git://git.debian.org/d-i/os-prober.git
+
+Package: os-prober-udeb
+Package-Type: udeb
+Architecture: any
+Depends: ${misc:Depends}, ${shlibs:Depends}, di-utils-mapdevfs, anna (>= 1.16), grub-mount-udeb [i386 amd64 powerpc ppc64 sparc mipsel kfreebsd-i386 kfreebsd-amd64]
+Provides: os-prober
+Description: utility to detect other OSes on a set of drives
+ This package is to be used by boot loader installers to detect other OSes
+ available on a system, in a generic format, which it can then adapt to its
+ own configuration format.
+
+Package: os-prober
+Architecture: any
+Section: utils
+Priority: extra
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: utility to detect other OSes on a set of drives
+ This package detects other OSes available on a system and outputs the
+ results in a generic machine-readable format.

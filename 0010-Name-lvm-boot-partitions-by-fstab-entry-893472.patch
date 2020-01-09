@@ -1,0 +1,45 @@
+From 163af6741ad259dc1a92ffcca2f563d0ea86bb44 Mon Sep 17 00:00:00 2001
+From: Gene Czarcinski <gczarcinski@gmail.com>
+Date: Tue, 5 Feb 2013 21:47:40 +0330
+Subject: [PATCH 10/18] Name lvm boot partitions by fstab entry(#893472)
+
+Recognize boot partitions on separate logical volumes and name them
+using their fstab entries.
+
+Resolves: rhbz#893472
+---
+ common.sh | 11 ++++++++++-
+ 1 file changed, 10 insertions(+), 1 deletion(-)
+
+diff --git a/common.sh b/common.sh
+index 85d13f0..52b0d2b 100644
+--- a/common.sh
++++ b/common.sh
+@@ -246,7 +246,7 @@ linux_mount_boot () {
+ 				if [ "$bindfrom" != "$tmpmnt/boot" ]; then
+ 					if mount --bind "$bindfrom" "$tmpmnt/boot"; then
+ 						mounted=1
+-						bootpart="$1"
++						bootpart="$tmppart"
+ 					else
+ 						debug "failed to bind-mount $bindfrom onto $tmpmnt/boot"
+ 					fi
+@@ -254,6 +254,15 @@ linux_mount_boot () {
+ 			fi
+ 			if [ "$mounted" ]; then
+ 				:
++			elif [ -e "$tmppart" ]; then
++				bootpart="$tmppart"
++				boottomnt="$tmppart"
++			elif [ -e "$tmpmnt/$tmppart" ]; then
++				bootpart="$tmppart"
++				boottomnt="$tmpmnt/$tmppart"
++			elif [ -e "/target/$tmppart" ]; then
++				bootpart="$tmppart"
++				boottomnt="/target/$tmppart"
+ 			elif [ -e "$1" ]; then
+ 				bootpart="$1"
+ 				boottomnt="$1"
+-- 
+2.5.5
+

@@ -1,0 +1,30 @@
+From f3efe9a4f506534e51d8251c74e6df74dfaefc30 Mon Sep 17 00:00:00 2001
+From: Robert Marshall <rmarshall@redhat.com>
+Date: Wed, 6 Jul 2016 13:24:48 -0400
+Subject: [PATCH] Use POSIX shell syntax (#1300262)
+
+Resolves POSIX compliance issues raised by coverity in relation to the patch
+causing device mapper devices to return their guaranteed name versus
+resolving the symlinks to the dm-# format.
+
+Related: rhbz#1300262
+---
+ linux-boot-probes/mounted/common/90fallback | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/linux-boot-probes/mounted/common/90fallback b/linux-boot-probes/mounted/common/90fallback
+index da12b88..3c5fdb0 100755
+--- a/linux-boot-probes/mounted/common/90fallback
++++ b/linux-boot-probes/mounted/common/90fallback
+@@ -10,7 +10,7 @@ mpoint="$3"
+ type="$4"
+ 
+ # Falling back to /dev/dm-# is unreliable; do not revert them
+-if [ "${partition:0:12}" == "/dev/mapper/" ]; then
++if [ "$(echo "${partition}" | cut -c1-12)" = "/dev/mapper/" ]; then
+         mappedpartition="${partition}"
+ else
+         mappedpartition=$(mapdevfs "$partition" 2>/dev/null) || mappedpartition="$partition"
+-- 
+2.5.5
+
