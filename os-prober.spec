@@ -1,6 +1,6 @@
 Name:           os-prober
 Version:        1.58
-Release:        9%{?dist}
+Release:        2%{?dist}
 Summary:        Probes disks on the system for installed operating systems
 
 Group:          System Environment/Base
@@ -10,27 +10,20 @@ URL:            http://kitenet.net/~joey/code/os-prober/
 Source0:        http://ftp.de.debian.org/debian/pool/main/o/os-prober/%{name}_%{version}.tar.gz
 # move newns binary outside of os-prober subdirectory, so that debuginfo
 # can be automatically generated for it
-Patch0001: 0001-Change-filepath-to-newns.patch
-Patch0002: 0002-Don-t-count-dummy-mach_kernel-as-MacOS-X-811412.patch
-Patch0003: 0003-Detect-OS-installed-to-mdraid-partition-752402.patch
-Patch0004: 0004-Yaboot-allows-spaces-in-append-825041.patch
-Patch0005: 0005-Detect-ld.so-after-usr-move-826754.patch
-Patch0006: 0006-Use-shell-processing-instead-of-basename-875356.patch
-Patch0007: 0007-Add-option-for-less-logging-893997.patch
-Patch0008: 0008-Improve-btrfs-detection-support-888341.patch
-Patch0009: 0009-Support-detection-on-btrfs-software-raid-906847.patch
-Patch0010: 0010-Name-lvm-boot-partitions-by-fstab-entry-893472.patch
-Patch0011: 0011-Set-correct-boot-partition-906886.patch
-Patch0012: 0012-Factor-out-unnecessary-logger-calls-875356.patch
-Patch0013: 0013-Issue-with-EFI-detection-in-logger-873207.patch
-Patch0014: 0014-Man-pages-missing-948848.patch
-Patch0015: 0015-Properly-handle-extended-dos-partitions-1322957.patch
-Patch0016: 0016-Windows-detection-requires-binary-grep-1322956.patch
-Patch0017: 0017-Add-Windows-10-detection-support-1322956.patch
-Patch0018: 0018-Suppress-non-blocking-dmraid-error-info-1198918.patch
-Patch0019: 0019-Do-not-resolve-device-mapper-symlinks-1300262.patch
-Patch0020: 0020-Use-POSIX-shell-syntax-1300262.patch
-Patch0021: 0021-Fix-extended-dos-partition-regex-1322957.patch
+Patch0:         os-prober-newnsdirfix.patch
+Patch1:         os-prober-no-dummy-mach-kernel.patch
+# Sent upstream
+Patch2:         os-prober-mdraidfix.patch
+Patch3:         os-prober-yaboot-parsefix.patch
+Patch4:         os-prober-usrmovefix.patch
+Patch5:         os-prober-remove-basename.patch
+Patch6:         os-prober-disable-debug-test.patch
+Patch7:         os-prober-btrfsfix.patch
+Patch8:         os-prober-bootpart-name-fix.patch
+Patch9:         os-prober-mounted-partitions-fix.patch
+Patch10:        os-prober-factor-out-logger.patch
+# To be sent upstream
+Patch11:        os-prober-factored-logger-efi-fix.patch
 
 Requires:       udev coreutils util-linux
 Requires:       grep /bin/sed /sbin/modprobe
@@ -42,27 +35,18 @@ distributions can be added easily.
 
 %prep
 %setup -q
-%patch01 -p1
-%patch02 -p1
-%patch03 -p1
-%patch04 -p1
-%patch05 -p1
-%patch06 -p1
-%patch07 -p1
-%patch08 -p1
-%patch09 -p1
-%patch10 -p1
-%patch11 -p1
-%patch12 -p1
-%patch13 -p1
-%patch14 -p1
-%patch15 -p1
-%patch16 -p1
-%patch17 -p1
-%patch18 -p1
-%patch19 -p1
-%patch20 -p1
-%patch21 -p1
+%patch0 -p1 -b .newnsdirfix
+%patch1 -p1 -b .macosxdummyfix
+%patch2 -p1 -b .mdraidfix
+%patch3 -p1 -b .yaboot-parsefix
+%patch4 -p1
+%patch5 -p1 -b .remove-basename
+%patch6 -p1 -b .disable-debug-test
+%patch7 -p1
+%patch8 -p1 -b .bootpart-name-fix
+%patch9 -p1 -b .mounted-partitions-fix
+%patch10 -p1 -b .factor-out-logger
+%patch11 -p1 -b .factor-out-logger-efi-fix
 
 find -type f -exec sed -i -e 's|usr/lib|usr/libexec|g' {} \;
 sed -i -e 's|grub-probe|grub2-probe|g' os-probes/common/50mounted-tests \
@@ -74,12 +58,10 @@ make %{?_smp_mflags} CFLAGS="%{optflags}"
 %install
 install -m 0755 -d %{buildroot}%{_bindir}
 install -m 0755 -d %{buildroot}%{_var}/lib/%{name}
-install -d 0755 -d %{buildroot}%{_mandir}/man1/
 
 install -m 0755 -p os-prober linux-boot-prober %{buildroot}%{_bindir}
 install -m 0755 -Dp newns %{buildroot}%{_libexecdir}/newns
 install -m 0644 -Dp common.sh %{buildroot}%{_datadir}/%{name}/common.sh
-install -m 0644 -Dp *.1 %{buildroot}%{_mandir}/man1/
 
 %ifarch m68k
 ARCH=m68k
@@ -110,45 +92,11 @@ fi
 %files
 %doc README TODO debian/copyright debian/changelog
 %{_bindir}/*
-%{_datadir}/%{name}
 %{_libexecdir}/*
-%{_mandir}/man1/*
+%{_datadir}/%{name}
 %{_var}/lib/%{name}
 
 %changelog
-* Wed Sep 14 2016 rmarshall@redhat.com - 1.58-9
-- Fix regular expression that missed a corner case when detecting
-  extended dos partitions.
-  Resolves: rhbz#1322957
-
-* Wed Jul 06 2016 rmarshall@redhat.com - 1.58-8
-- Resolve some coverity concerns with how the previous patch detected
-  whether or not a partition was a device mapper device.
-  Related: rhbz#1300262
-
-* Tue Jul 05 2016 rmarshall@redhat.com - 1.58-7
-- Do not resolve device mapper links when generating stanzas
-  for bootloader.
-  Resolves: rhbz#1300262
-
-* Wed May 04 2016 rmarshall@redhat.com - 1.58-6
-- Adding handling to skip probing extended dos partitions
-  Resolves: rhbz#1322957
-- Improve Windows detection for dual boot and support Windows 10
-  Resolves: rhbz#1322956
-- Suppress non-blocking dmraid sector size warning message
-  Resolves: rhbz#1198918
-
-* Fri Jan 24 2014 Daniel Mach <dmach@redhat.com> - 1.58-5
-- Mass rebuild 2014-01-24
-
-* Mon Jan 20 2014 Peter Jones <pjones@redhat.com> - 1.58-4
-- Add man pages.
-  Resolves: rhbz#948848
-
-* Fri Dec 27 2013 Daniel Mach <dmach@redhat.com> - 1.58-3
-- Mass rebuild 2013-12-27
-
 * Tue Jun 18 2013 Hedayat Vatankhah <hedayat.fwd+rpmchlog@gmail.com> - 1.58-2
 - Fix a bug in EFI detection because of redirecting result output
 

@@ -1,15 +1,14 @@
-From a523db148d1af573614f92f3284068ef08b2c5b6 Mon Sep 17 00:00:00 2001
+From f71f7eb5c492720c24033901ef8c6c420e188ff2 Mon Sep 17 00:00:00 2001
 From: Peter Jones <pjones@redhat.com>
 Date: Thu, 10 May 2012 14:47:35 -0400
-Subject: [PATCH 02/18] Don't count dummy mach_kernel as MacOS X (#811412)
+Subject: [PATCH] Don't count our dummy mach_kernel as real MacOS X.
 
-Resolves: rhbz#811412
 ---
- os-probes/mounted/powerpc/20macosx | 2 +-
+ os-probes/mounted/powerpc/20macosx |    2 +-
  1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/os-probes/mounted/powerpc/20macosx b/os-probes/mounted/powerpc/20macosx
-index dd4207f..16d9da6 100755
+index dd4207f..d630fec 100755
 --- a/os-probes/mounted/powerpc/20macosx
 +++ b/os-probes/mounted/powerpc/20macosx
 @@ -21,7 +21,7 @@ esac
@@ -22,5 +21,5 @@ index dd4207f..16d9da6 100755
    result "$1:Mac OS X:$label:macosx"
    exit 0
 -- 
-2.5.5
+1.7.10.1
 

@@ -1,23 +1,6 @@
-From e314c1fc4cbdf8d7172fb6f8b87b127b21dd26c0 Mon Sep 17 00:00:00 2001
-From: John Reiser <jreiser@bitwagon.com>
-Date: Tue, 5 Feb 2013 21:47:40 +0330
-Subject: [PATCH 12/18] Factor out unnecessary logger calls (#875356)
-
-Numerous invocations of logger bogged down os-prober on system with
-large numbers of partitions. Refactored to reduce the total number of
-unique invocations to increase speed.
-
-Resolves: rhbz#875356
----
- common.sh         | 24 ++++++++++++++++--------
- linux-boot-prober | 11 +++++++++++
- os-prober         | 12 +++++++++++-
- 3 files changed, 38 insertions(+), 9 deletions(-)
-
-diff --git a/common.sh b/common.sh
-index 1dbf7a3..7fcae5a 100644
---- a/common.sh
-+++ b/common.sh
+diff -up os-prober-1.57/common.sh.logger-factor-out os-prober-1.57/common.sh
+--- os-prober-1.57/common.sh.logger-factor-out	2013-02-05 21:19:38.896088800 +0330
++++ os-prober-1.57/common.sh	2013-02-05 21:20:04.624767147 +0330
 @@ -62,10 +62,14 @@ cache_progname() {
    esac
  }
@@ -56,10 +39,9 @@ index 1dbf7a3..7fcae5a 100644
  
  # shim to make it easier to use os-prober outside d-i
  if ! type mapdevfs >/dev/null 2>&1; then
-diff --git a/linux-boot-prober b/linux-boot-prober
-index 57bf245..3b89750 100755
---- a/linux-boot-prober
-+++ b/linux-boot-prober
+diff -up os-prober-1.57/linux-boot-prober.logger-factor-out os-prober-1.57/linux-boot-prober
+--- os-prober-1.57/linux-boot-prober.logger-factor-out	2013-02-05 21:19:59.395832518 +0330
++++ os-prober-1.57/linux-boot-prober	2013-02-05 21:24:42.301295713 +0330
 @@ -1,4 +1,12 @@
  #!/bin/sh
 +
@@ -73,7 +55,7 @@ index 57bf245..3b89750 100755
  . /usr/share/os-prober/common.sh
  
  set -e
-@@ -147,6 +155,7 @@ if ! mapped="$(mapdevfs "$partition")"; then
+@@ -147,6 +155,7 @@ if ! mapped="$(mapdevfs "$partition")";
  	continue
  fi
  
@@ -87,10 +69,9 @@ index 57bf245..3b89750 100755
  fi
 +) 9>&1 | logger 1>&-  # fd_logger
 +) 3>&1  # fd_result
-diff --git a/os-prober b/os-prober
-index f5052af..4b371d6 100755
---- a/os-prober
-+++ b/os-prober
+diff -up os-prober-1.57/os-prober.logger-factor-out os-prober-1.57/os-prober
+--- os-prober-1.57/os-prober.logger-factor-out	2013-02-05 21:19:52.914913541 +0330
++++ os-prober-1.57/os-prober	2013-02-05 21:25:35.168634780 +0330
 @@ -1,7 +1,14 @@
  #!/bin/sh
  set -e
@@ -121,6 +102,3 @@ index f5052af..4b371d6 100755
  done
 +) 9>&1 | logger 1>&-  # fd_logger
 +) 3>&1  # fd_result
--- 
-2.5.5
-
