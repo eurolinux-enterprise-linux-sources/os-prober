@@ -1,0 +1,59 @@
+diff -urpN os-prober-1.58/linux-boot-prober.1.man os-prober-1.58/linux-boot-prober.1
+--- os-prober-1.58/linux-boot-prober.1.man	2014-01-20 15:52:00.354946125 -0500
++++ os-prober-1.58/linux-boot-prober.1	2014-01-20 15:55:18.736367600 -0500
+@@ -0,0 +1,27 @@
++.TH linux-boot-prober 1 "20 Jan 2014" "linux-boot-prober"
++.SH "NAME"
++linux-boot-prober \(em Determine boot characteristics of a specified device.
++.SH "SYNOPSIS"
++.B linux-boot-prober
++.I <partition>
++.SH "DESCRIPTION"
++.PP
++The \fBlinux-boot-prober\fR utility will try to work out how to boot the
++linux root partition specified by \fI<partition>\fR.  If successful, it
++will outoput one or more lines of the form:
++
++<root partition>:<boot partition>:<label>:<kernel path>:<initrd path>:<kernel parameters>
++
++For example, for a system with a kernel at \fI/boot/vmlinuz\fR and an
++initramfs at \fI/boot/initrd.gz\fR, and with \fI/\fR on \fI/dev/sda2\fR and
++\fI/boot\fR on \fI/dev/sda1\fR, the command "linux-boot-prober /dev/sda1" will
++display:
++
++/dev/sda2:/dev/sda1:Linux:/vmlinuz:/initrd.gz:root=/dev/sda1
++
++Some partitions will not be displayed by \fBlinux-boot-prober\fI.  If a
++partition is mounted on \fI/\fR, \fI/target\fR, or \fI/target/boot\fR, it will
++be skipped.
++.SH "SEE ALSO"
++.PP
++\fBos-prober\fR(1)
+diff -urpN os-prober-1.58/os-prober.1.man os-prober-1.58/os-prober.1
+--- os-prober-1.58/os-prober.1.man	2014-01-20 15:52:04.503934030 -0500
++++ os-prober-1.58/os-prober.1	2014-01-20 15:57:15.300026922 -0500
+@@ -0,0 +1,24 @@
++.TH os-prober 1 "20 Jan 2014" "os-prober"
++.SH "NAME"
++os-prober \(em Discover bootable partitions on the local system.
++.SH "SYNOPSIS"
++.B os-prober
++.SH "DESCRIPTION"
++.PP
++The \fBos-prober\fR utility will scan all disks available on the system for
++other operating systems.  For each discovered OS, it will output a line of
++the form:
++
++<partition>:<descriptive name>:<short name>:<kind of loader>
++
++For example, on system with Windows XP installed on \fI/dev/sda1\fR,
++\fBos-prober\fR will display:
++
++/dev/sda1:Windows NT/2000/XP:WinNT:chain
++
++Note that for Linux systems that are discovered, a call to
++\fBlinux-boot-prober\fI may be required in order to fully discover the
++necessary information to boot the system.
++.SH "SEE ALSO"
++.PP
++\fBlinux-boot-prober\fR(1)

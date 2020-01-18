@@ -1,6 +1,6 @@
 Name:           os-prober
 Version:        1.58
-Release:        2%{?dist}
+Release:        5%{?dist}
 Summary:        Probes disks on the system for installed operating systems
 
 Group:          System Environment/Base
@@ -24,6 +24,7 @@ Patch9:         os-prober-mounted-partitions-fix.patch
 Patch10:        os-prober-factor-out-logger.patch
 # To be sent upstream
 Patch11:        os-prober-factored-logger-efi-fix.patch
+Patch12:	os-prober-man.patch
 
 Requires:       udev coreutils util-linux
 Requires:       grep /bin/sed /sbin/modprobe
@@ -47,6 +48,7 @@ distributions can be added easily.
 %patch9 -p1 -b .mounted-partitions-fix
 %patch10 -p1 -b .factor-out-logger
 %patch11 -p1 -b .factor-out-logger-efi-fix
+%patch12 -p1 -b .man
 
 find -type f -exec sed -i -e 's|usr/lib|usr/libexec|g' {} \;
 sed -i -e 's|grub-probe|grub2-probe|g' os-probes/common/50mounted-tests \
@@ -58,10 +60,12 @@ make %{?_smp_mflags} CFLAGS="%{optflags}"
 %install
 install -m 0755 -d %{buildroot}%{_bindir}
 install -m 0755 -d %{buildroot}%{_var}/lib/%{name}
+install -d 0755 -d %{buildroot}%{_mandir}/man1/
 
 install -m 0755 -p os-prober linux-boot-prober %{buildroot}%{_bindir}
 install -m 0755 -Dp newns %{buildroot}%{_libexecdir}/newns
 install -m 0644 -Dp common.sh %{buildroot}%{_datadir}/%{name}/common.sh
+install -m 0644 -Dp *.1 %{buildroot}%{_mandir}/man1/
 
 %ifarch m68k
 ARCH=m68k
@@ -92,11 +96,22 @@ fi
 %files
 %doc README TODO debian/copyright debian/changelog
 %{_bindir}/*
-%{_libexecdir}/*
 %{_datadir}/%{name}
+%{_libexecdir}/*
+%{_mandir}/man1/*
 %{_var}/lib/%{name}
 
 %changelog
+* Fri Jan 24 2014 Daniel Mach <dmach@redhat.com> - 1.58-5
+- Mass rebuild 2014-01-24
+
+* Mon Jan 20 2014 Peter Jones <pjones@redhat.com> - 1.58-4
+- Add man pages.
+  Resolves: rhbz#948848
+
+* Fri Dec 27 2013 Daniel Mach <dmach@redhat.com> - 1.58-3
+- Mass rebuild 2013-12-27
+
 * Tue Jun 18 2013 Hedayat Vatankhah <hedayat.fwd+rpmchlog@gmail.com> - 1.58-2
 - Fix a bug in EFI detection because of redirecting result output
 
